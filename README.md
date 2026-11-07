@@ -67,13 +67,35 @@ Open the folder that is the `cis5710-homework` repository you created and cloned
 
 ![](images/open-devcontainer.png)
 
-For reference, our Docker image is [hosted on Docker Hub](https://hub.docker.com/r/cis5710). This is the same image that the Gradescope autograder uses, so you should see the same results in Docker as you see with the autograder.
+For reference, our Docker image is [hosted on Docker Hub](https://hub.docker.com/r/cis5710). This is the same image that the Gradescope autograder uses, so you should see the same results in Docker that you see with the autograder.
+
+### Container Filesystem
+
+Your running container is like a separate (virtual) computer, running inside your laptop. The container has its own files, except for the Git working copy directory which is shared automatically thanks to your VS Code Dev Container (at `/workspaces/` inside the container). Thus, you can use your Git working copy directory to copy files into/out of the container. VS Code also makes it easy to browse the container's filesystem, right-click on a file and *Download* it to your laptop.
+
+> Files in your container's filesystem are ephemeral, and will be lost when the container is stopped. Make sure all of the code you write is periodically copied to the Git working copy directory, or downloaded from the container to your laptop.
 
 ### Updating your Dev Container
 
 Occasionally, we may need to ship an update to the Dev Container image. You will pull the updated [`.devcontainer.json`](.devcontainer.json) file from our `upstream` GitHub repo, and then need to rebuild your Dev Container. With the Dev Container running in VS Code, open the Command Palette (`Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on Mac), type `Rebuild` and select the `Dev Containers: Rebuild Container` option (see screenshot below). This will fetch the new image and re-launch your container.
 
 ![](images/rebuild-devcontainer.png)
+
+### Running on ARM
+
+Our default container image is for the x86 ISA: this is what the autograder uses. However, if you are running on an ARM machine (e.g., Apple Silicon), your container incurs some runtime overhead translating from x86 to ARM on-the-fly. We also maintain an ARM version of our container image to improve performance on ARM machines.
+
+To switch to the ARM container, find the `.devcontainer.json` file in the root directory of your Git repo working copy. Edit one line of that JSON file:
+
+```
+  // change it from this...
+  "image": "cis5710/hw-gem5-gradescope:vX",
+
+  // ...to this
+  "image": "cis5710/hw-gem5-arm64:vX",
+```
+
+where `:vX` is the version tag, e.g., `:v3`. Note that you should preserve the `:vX` version tag to ensure you are using the latest version of the container image.
 
 
 ### Running Docker directly
@@ -83,7 +105,7 @@ Sometimes VS Code Dev Containers can be difficult to set up, or you may prefer t
 First, find the latest *version* of our container image [on DockerHub](https://hub.docker.com/u/cis5710) or in the [`.devcontainer.json`](.devcontainer.json) file. In all the commands below, replace `TODO-VERSION` with that latest version you found. This first command downloads the container image to your laptop:
 
 ```
-docker pull cis5710/hw1-gem5-gradescope:TODO-VERSION
+docker pull cis5710/hw-gem5-gradescope:TODO-VERSION
 
 ```
 
@@ -93,7 +115,7 @@ The container has its own filesystem, separate from the files on your laptop. Ho
 
 After editing this command appropriately, launch the container for the first time:
 ```
-docker run --name MY-CIS5710 --interactive --tty --mount type=bind,source="/PATH/ON/YOUR/LAPTOP",target=/MYSTUFF cis5710/hw1-gem5-gradescope:TODO-VERSION /bin/bash
+docker run --name MY-CIS5710 --interactive --tty --mount type=bind,source="/PATH/ON/YOUR/LAPTOP",target=/MYSTUFF cis5710/hw-gem5-gradescope:TODO-VERSION /bin/bash
 ```
 
 The Docker app offers a nice graphical interface to start/stop/delete containers and images. We discuss how to perform these common operations on the command-line below.
